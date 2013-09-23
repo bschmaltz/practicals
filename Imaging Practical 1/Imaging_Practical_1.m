@@ -199,10 +199,7 @@ function print_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'colormask') && isfield(handles,'graymask') 
-    fileName = 'print me';
-    im = getframe();
-    %saves the image in variable "im" to a PNG file 
-    imwrite(im.cdata, fileName, 'PNG')
+    saveas(gcf,'Image Practical 1 printout.pdf');
 else
 	disp 'load image and set threshold';
 end
