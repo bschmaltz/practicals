@@ -90,6 +90,7 @@ if isfield(handles,'color') && isfield(handles,'gray')
     axes(handles.histogram);
     v = get(hObject,'Value');
     [M,F]=mode(double(gray(:)))
+    h=imhist(gray), ylim([0,F]);
     imhist(gray), ylim([0,F]);
     hold on
     plot([v,v],[0,F],'r');
@@ -127,6 +128,8 @@ if isfield(handles,'color') && isfield(handles,'gray')
     handles.colormask = colormask;
     handles.graymask = graymask;
     handles.threshold = threshold;
+    handles.threshold_Value = v;
+    handles.h = h;
     guidata(gcbo,handles);
 else
     disp 'image not loaded'
@@ -150,7 +153,12 @@ function save_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'colormask') && isfield(handles,'graymask') 
-    HGSAVE(handles.color_Image,'foo.fig')
+    colormask = handles.colormask;
+    graymask = handles.graymask;
+    threshold = handles.threshold;
+    threshold_value = handles.threshold_Value
+    histogram = handles.h;
+    uisave({'colormask', 'graymask', 'threshold', 'histogram', 'threshold_value'},'image practical 1 figures');
 else
 	disp 'load image and set threshold';
 end
