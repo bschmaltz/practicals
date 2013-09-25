@@ -188,8 +188,8 @@ function waveform_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from waveform
 start = str2num(get(handles.start_time, 'String'));
 stop = str2num(get(handles.end_time, 'String'));
-if isempty(start)||isempty(stop)
-  disp('enter a start and stop time');
+if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
+  disp('enter a legal start and stop time');
 else
   disp('start and stop times entered, loading plot...');
   wave_num = get(hObject,'Value');
@@ -197,8 +197,8 @@ else
       wave_num=0;
   end
   axes(handles.original);
-  [tm,sig]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1);
-  plot(tm,sig), xlim([start,stop]);
+  [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
+  plot(tm,signal), xlim([start,stop]);
   disp 'graph plotted'
 end
 
