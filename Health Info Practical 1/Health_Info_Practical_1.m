@@ -22,7 +22,7 @@ function varargout = Health_Info_Practical_1(varargin)
 
 % Edit the above text to modify the response to help Health_Info_Practical_1
 
-% Last Modified by GUIDE v2.5 24-Sep-2013 21:15:11
+% Last Modified by GUIDE v2.5 25-Sep-2013 03:07:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,7 +61,6 @@ guidata(hObject, handles);
 % UIWAIT makes Health_Info_Practical_1 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-
 % --- Outputs from this function are returned to the command line.
 function varargout = Health_Info_Practical_1_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -74,18 +73,18 @@ varargout{1} = handles.output;
 
 
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function start_time_Callback(hObject, eventdata, handles)
+% hObject    handle to start_time (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% Hints: get(hObject,'String') returns contents of start_time as text
+%        str2double(get(hObject,'String')) returns contents of start_time as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function start_time_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to start_time (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -97,18 +96,18 @@ end
 
 
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function end_time_Callback(hObject, eventdata, handles)
+% hObject    handle to end_time (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% Hints: get(hObject,'String') returns contents of end_time as text
+%        str2double(get(hObject,'String')) returns contents of end_time as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function end_time_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to end_time (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -120,18 +119,18 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function hr_Callback(hObject, eventdata, handles)
+% hObject    handle to hr (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% Hints: get(hObject,'String') returns contents of hr as text
+%        str2double(get(hObject,'String')) returns contents of hr as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function hr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to hr (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -143,18 +142,18 @@ end
 
 
 
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
+function avg_rr_interval_Callback(hObject, eventdata, handles)
+% hObject    handle to avg_rr_interval (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+% Hints: get(hObject,'String') returns contents of avg_rr_interval as text
+%        str2double(get(hObject,'String')) returns contents of avg_rr_interval as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
+function avg_rr_interval_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to avg_rr_interval (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -177,7 +176,7 @@ function save_Callback(hObject, eventdata, handles)
 % hObject    handle to save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+keyboard;
 
 % --- Executes on selection change in waveform.
 function waveform_Callback(hObject, eventdata, handles)
@@ -187,6 +186,21 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
+start = str2num(get(handles.start_time, 'String'));
+stop = str2num(get(handles.end_time, 'String'));
+if isempty(start)||isempty(stop)
+  disp('enter a start and stop time');
+else
+  disp('start and stop times entered, loading plot...');
+  wave_num = get(hObject,'Value');
+  if wave_num == 10
+      wave_num=0;
+  end
+  axes(handles.original);
+  [tm,sig]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1);
+  plot(tm,sig), xlim([start,stop]);
+  disp 'graph plotted'
+end
 
 
 % --- Executes during object creation, after setting all properties.
