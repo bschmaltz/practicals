@@ -99,8 +99,8 @@ if isfield(handles,'color') && isfield(handles,'gray')
     %draw threshold image
     axes(handles.threshold_Image);
     threshold=gray;
-    threshold(threshold>=v)=255; %pixels from the treshold and above are white
-    threshold(threshold<v)=0; %pixels below the threshold are black
+    threshold(threshold>=v)=255;
+    threshold(threshold<v)=0;
     imshow(threshold);
 
     %draw colored image with mask
@@ -118,7 +118,7 @@ if isfield(handles,'color') && isfield(handles,'gray')
     colormask(:,:,3)= colormask_B;
     imshow(colormask);
 
-    %draw gray scale image with mask
+    %draw gray scale image with max
     axes(handles.gray_Image);
     graymask=gray;
     graymask(threshold==0)=0;
@@ -173,18 +173,16 @@ function load_Callback(hObject, eventdata, handles)
 if isequal(filename,0) || isequal(pathname,0) %make sure they didn't hit cancel
     disp 'Please load an image'
 else
-    %get images
+    %get image
     color = imread(strcat(pathname, filename));
     gray = rgb2gray(color);
 
-    %put images on axes
     axes(handles.color_Image);
     imshow(color);
 
     axes(handles.gray_Image);
     imshow(gray);
 
-    %make histogram
     axes(handles.histogram);
     [M,F]=mode(double(gray(:)))
     imhist(gray), ylim([0,F]);
