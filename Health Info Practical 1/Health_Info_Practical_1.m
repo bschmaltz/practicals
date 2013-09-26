@@ -200,21 +200,22 @@ else
   [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
   plot(tm,signal), xlim([start,stop]);
   
+  %gaussian convulution
   sigma = 2;
   width = 30;
   x = linspace(-width/2, width/2, width);
-  b = exp(-x.^2 / (2*sigma ^2));
+  b = exp(-x.^2 / (2*sigma ^2)); %b is the convultion kernel
   b = b/ sum(b);
   signal = conv(signal, b, 'same');
-  ds = diff(signal)./diff(tm);
+  ds = diff(signal)./diff(tm); %first differentiation
   ds = conv(ds, b, 'same');
   ds = ds.^2;
 
-  dds = diff(ds)./diff(tm(2:end));
+  dds = diff(ds)./diff(tm(2:end)); %second differentiation
   dds = 1.3*ds(2:end) + 1.1*dds;
 
   thres = 0.5 * max(dds(width:(end-width)));
-  min_dist = 90;
+  min_dist = 72;  %fails when patient heartrate is over 300bpm or irregular heartbeat
   [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'MINPEAKHEIGHT', thres);
   
   % Remove detected peaks at the very beginning and end due to convolution
