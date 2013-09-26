@@ -219,16 +219,22 @@ else
 
   dds = diff(ds)./diff(tm(2:end));
   dds = 1.3*ds(2:end) + 1.1*dds;
-  figure
-  plot(tm(3:end), dds), xlim([start,stop]);
-  ylim([min(dds) max(dds)])
 
-  thres = 0.5 * max(dds(width:(end-width)))
-  min_dist = 50;
+  thres = 0.5 * max(dds(width:(end-width)));
+  min_dist = 90;
   [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'MINPEAKHEIGHT', thres);
+  
+  % Remove detected peaks at the very beginning and end due to convolution
+  % errors
+  final_s(final_s > (length(signal) - width)) = [];
+  final_s(final_s < width) = [];
 
   beats = zeros(1, length(dds));
   beats(final_s) = 1;
+
+  heartrate = sum(beats) / (stop-start) * 360 * 60; 
+  rr = diff(final_s);
+  avg_rr = mean(rr) / 360;
   axes(handles.processed);
   plot(tm(3:end), beats), xlim([start,stop]);
   disp 'graph plotted'
