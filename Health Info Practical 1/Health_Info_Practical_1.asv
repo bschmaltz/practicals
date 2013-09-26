@@ -177,11 +177,11 @@ function save_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'hr')
-    processed = handles.processed_data;
-    avg_rr = get(handles.avg_rr_interval, 'String');
-    hr = get(handles.hr, 'String');
+    processed = handles.processed;
+    avg_rr = handles.avg_rr;
+    hr = handles.hr;
     start = get(handles.start_time, 'String');
-    stop = get(handles.end_time, 'String');
+    stop = handles.stop;
     uisave({'processed', 'avg_rr', 'hr', 'start', 'stop'},'health practical 1 save');
 else
 	disp 'load a wave';
@@ -246,7 +246,7 @@ else
   plot(tm(3:end), beats), xlim([start,stop]);
   disp 'graph plotted'
   
-  handles.processed_data = tm(3:end), beats; %for saving
+  handles.processed = plot(tm(3:end), beats), xlim([start,stop]);
   guidata(gcbo,handles);
 end
 
