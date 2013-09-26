@@ -198,10 +198,20 @@ else
   end
   axes(handles.original);
   [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
+
+  L = length(signal);
+  NFFT = 2^nextpow2(L);
+  S = fft(signal, NFFT)/L;
+  fs = 360;
+  f = fs/2*linspace(0,1,NFFT/2+1);
+
+  % Low-pass filter (8-3Hz)
+  S(f > 8 | f < 3) = 0;
+
+  signal = ifft(S);
+  signal = signal(1:L);
   plot(tm,signal), xlim([start,stop]);
   disp 'graph plotted'
-  disp 'processing image...'
-  
 end
 
 
