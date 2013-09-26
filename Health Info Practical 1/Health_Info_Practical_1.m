@@ -201,21 +201,27 @@ else
   plot(tm,signal), xlim([start,stop]);
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%BRIANT IN BEAST MODE%%%%%%%%%%%%%%%%%%%%%%%%
-  L = length(signal);
-  NFFT = 2^nextpow2(L);
-  S = fft(signal, NFFT)/L;
-  fs = 360;
-  f = fs/2*linspace(0,1,NFFT/2+1);
-
-  % Low-pass filter (8-3Hz)
-  S(f > 8 | f < 3) = 0;
-
-  signal = ifft(S);
-  signal = signal(1:L);
-  
-  axes(handles.processed);
-  plot(tm,signal), xlim([start,stop]);
-  disp 'graph plotted'
+%   L = length(signal);
+%   NFFT = 2^nextpow2(L);
+%   S = fft(signal, NFFT)/L;
+%   fs = 360;
+%   f = fs/2*linspace(0,1,NFFT/2+1);
+% 
+%   % Low-pass filter (8-3Hz)
+%   S(f > 8 | f < 3) = 0;
+% 
+%   signal = ifft(S);
+%   signal = signal(1:L);
+    %filter first time
+    a=0.2;
+    signal=filter(a, [1 a-1], signal);
+    signal=filter([1-a a-1],[1 a-1], signal);
+    
+    
+    
+    axes(handles.processed);
+    plot(tm,signal), xlim([start+25,stop]);
+    disp 'graph plotted'
 end
 
 
