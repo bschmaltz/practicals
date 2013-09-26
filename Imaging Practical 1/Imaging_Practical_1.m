@@ -199,7 +199,29 @@ function print_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'colormask') && isfield(handles,'graymask') 
-    saveas(gcf,'Image Practical 1 printout.pdf');
+    F=getframe(handles.color_Image);               %select axes in GUI
+    figure();                                      %new figure
+    image(F.cdata);                                %show selected axes in new figure
+    saveas(gcf, 'color_Image', 'png');             %save figure
+    close(gcf);                                    %and close it
+    
+    F=getframe(handles.gray_Image);                %select axes in GUI
+    figure();                                      %new figure
+    image(F.cdata);                                %show selected axes in new figure
+    saveas(gcf, 'gray_image', 'png');              %save figure
+    close(gcf);                                    %and close it
+    
+    F=getframe(handles.threshold_Image);                 %select axes in GUI
+    figure();                                      %new figure
+    image(F.cdata);                                %show selected axes in new figure
+    saveas(gcf, 'threshold_image', 'png');         %save figure
+    close(gcf);                                    %and close it
+    
+    F=getframe(handles.histogram);                 %select axes in GUI
+    figure();                                      %new figure
+    image(F.cdata);                                %show selected axes in new figure
+    saveas(gcf, 'histogram', 'png');             %save figure
+    close(gcf);                                    %and close it
 else
 	disp 'load image and set threshold';
 end

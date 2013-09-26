@@ -200,6 +200,8 @@ else
   [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
   plot(tm,signal), xlim([start,stop]);
   disp 'graph plotted'
+  disp 'processing image...'
+  
 end
 
 
