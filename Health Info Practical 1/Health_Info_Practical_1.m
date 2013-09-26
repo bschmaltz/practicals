@@ -235,6 +235,10 @@ else
   heartrate = sum(beats) / (stop-start) * 360 * 60; 
   rr = diff(final_s);
   avg_rr = mean(rr) / 360;
+  
+  set(handles.hr, 'String', num2str(heartrate));
+  set(handles.avg_rr_interval, 'String', num2str(avg_rr));
+  
   axes(handles.processed);
   plot(tm(3:end), beats), xlim([start,stop]);
   disp 'graph plotted'
