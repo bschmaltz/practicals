@@ -206,6 +206,7 @@ else
   f = fs/2*linspace(0,1,NFFT/2+1);
 
   % Low-pass filter (8-3Hz)
+  % Test line
   S(f > 8 | f < 3) = 0;
 
   signal = ifft(S);
