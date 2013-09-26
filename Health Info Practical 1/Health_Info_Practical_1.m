@@ -201,6 +201,36 @@ else
   plot(tm,signal), xlim([start,stop]);
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%BRYANT IN BEAST MODE%%%%%%%%%%%%%%%%%%%%%%%%
+  L = length(signal);
+  NFFT = 2^nextpow2(L);
+  S = fft(signal, NFFT)/L;
+  fs = 360;
+  f = fs/2*linspace(0,1,NFFT/2+1);
+
+  sigma = 2;
+  size = 30;
+  x = linspace(-size/2, size/2, size);
+  b = exp(-x.^2 / (2*sigma ^2));
+  b = b/ sum(b);
+  signal = conv(signal, b, 'same');
+  ds = diff(signal)./diff(tm);
+  ds = conv(ds, b, 'same');
+
+  dds = diff(ds)./diff(tm(2:end));
+  figure
+  plot(tm(3:end), dds), xlim([start,stop]);
+  ylim([min(dds) max(dds)])
+  dds = 1.3*ds(2:end) + 1.1*dds;
+
+  thres = 0.5 * max(dds);
+  min_dist = 50;
+  [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'THRESHOLD', thres);
+
+  beats = zeros(1, length(dds));
+  beats(final_s) = 1;
+  axes(handles.processed);
+  plot(tm(3:end), beats), xlim([start,stop+100]);
+  disp 'graph plotted'
 end
 
 
