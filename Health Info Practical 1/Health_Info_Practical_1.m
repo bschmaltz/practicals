@@ -198,7 +198,9 @@ else
   end
   axes(handles.original);
   [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
-
+  plot(tm,signal), xlim([start,stop]);
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%BRIANT IN BEAST MODE%%%%%%%%%%%%%%%%%%%%%%%%
   L = length(signal);
   NFFT = 2^nextpow2(L);
   S = fft(signal, NFFT)/L;
@@ -210,6 +212,8 @@ else
 
   signal = ifft(S);
   signal = signal(1:L);
+  
+  axes(handles.processed);
   plot(tm,signal), xlim([start,stop]);
   disp 'graph plotted'
 end
