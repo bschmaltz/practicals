@@ -207,19 +207,12 @@ else
   fs = 360;
   f = fs/2*linspace(0,1,NFFT/2+1);
 
-  % Low-pass filter (8-3Hz)
-%  S(f > 60 | f < 1) = 0;
-%
-%  signal = ifft(S);
-%  signal = signal(1:L);
-%  
   sigma = 2;
   size = 30;
   x = linspace(-size/2, size/2, size);
   b = exp(-x.^2 / (2*sigma ^2));
   b = b/ sum(b);
   signal = conv(signal, b, 'same');
-  
   ds = diff(signal)./diff(tm);
   ds = conv(ds, b, 'same');
 
