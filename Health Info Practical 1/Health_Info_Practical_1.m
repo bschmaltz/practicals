@@ -200,7 +200,7 @@ else
   [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
   plot(tm,signal), xlim([start,stop]);
   
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%BRIANT IN BEAST MODE%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%BRYANT IN BEAST MODE%%%%%%%%%%%%%%%%%%%%%%%%
   L = length(signal);
   NFFT = 2^nextpow2(L);
   S = fft(signal, NFFT)/L;
@@ -208,14 +208,30 @@ else
   f = fs/2*linspace(0,1,NFFT/2+1);
 
   % Low-pass filter (8-3Hz)
-  % Test line
-  S(f > 8 | f < 3) = 0;
+%  S(f > 60 | f < 1) = 0;
+%
+%  signal = ifft(S);
+%  signal = signal(1:L);
+%  
+  a = 0.2;
+  signal = filter(a, [1 a-1], signal);
+  signal = filter([1-a a-1],[1 a], signal);
 
-  signal = ifft(S);
-  signal = signal(1:L);
-  
+  ds = diff(signal)./diff(tm);
+  ds = filter(a, [1 a-1], ds);
+  ds = filter([1-a a-1],[1 a], ds);
+
+  dds = diff(ds)./diff(diff(tm));
+  dds = 1.3*ds(2:end) + 1.1*dds;
+
+  thres = 0.5 * max(dds);
+  min_dist = 50;
+  final_s = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'THRESHOLD', thres);
+
+  size(dds)
+  size(tm(3:end))
   axes(handles.processed);
-  plot(tm,signal), xlim([start,stop]);
+  plot(tm(3:end),dds), xlim([start,stop+100]), ylim([min(dds) max(dds)]);
   disp 'graph plotted'
 end
 
