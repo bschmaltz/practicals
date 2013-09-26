@@ -213,25 +213,30 @@ else
 %  signal = ifft(S);
 %  signal = signal(1:L);
 %  
-  a = 0.2;
-  signal = filter(a, [1 a-1], signal);
-  signal = filter([1-a a-1],[1 a], signal);
-
+  sigma = 2;
+  size = 30;
+  x = linspace(-size/2, size/2, size);
+  b = exp(-x.^2 / (2*sigma ^2));
+  b = b/ sum(b);
+  signal = conv(signal, b, 'same');
+  
   ds = diff(signal)./diff(tm);
-  ds = filter(a, [1 a-1], ds);
-  ds = filter([1-a a-1],[1 a], ds);
+  ds = conv(ds, b, 'same');
 
-  dds = diff(ds)./diff(diff(tm));
+  dds = diff(ds)./diff(tm(2:end));
+  figure
+  plot(tm(3:end), dds), xlim([start,stop]);
+  ylim([min(dds) max(dds)])
   dds = 1.3*ds(2:end) + 1.1*dds;
 
   thres = 0.5 * max(dds);
   min_dist = 50;
-  final_s = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'THRESHOLD', thres);
+  [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'THRESHOLD', thres);
 
-  size(dds)
-  size(tm(3:end))
+  beats = zeros(1, length(dds));
+  beats(final_s) = 1;
   axes(handles.processed);
-  plot(tm(3:end),dds), xlim([start,stop+100]), ylim([min(dds) max(dds)]);
+  plot(tm(3:end), beats), xlim([start,stop+100]);
   disp 'graph plotted'
 end
 
