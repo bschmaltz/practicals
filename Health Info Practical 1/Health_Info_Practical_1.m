@@ -206,7 +206,7 @@ else
       wave_num=0;
   end
   axes(handles.original);
-  [tm,signal]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
+  [tm,signal,fs]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
   plot(tm,signal), xlim([start,stop]);
   
   %gaussian convulution
@@ -235,9 +235,9 @@ else
   beats = zeros(1, length(dds));
   beats(final_s) = 1;
 
-  heartrate = sum(beats) / (stop-start) * 360 * 60; 
+  heartrate = sum(beats) / (stop-start) * fs * 60; 
   rr = diff(final_s);
-  avg_rr = mean(rr) / 360;
+  avg_rr = mean(rr) / fs;
   
   set(handles.hr, 'String', num2str(heartrate));
   set(handles.avg_rr_interval, 'String', num2str(avg_rr));
