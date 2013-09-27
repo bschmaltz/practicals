@@ -1,0 +1,15 @@
+Group 5: Charles Schmaltz, Briant Menn, William Hendry
+
+For the health informatics practical we used the toolbox under
+quickstart here: http://physionet.org/physiotools/matlab/wfdb-app-matlab/
+
+Imaging Practical
+-----------------
+GUI: Imaging Pracical 1\Imaging_Practical_1.m
+Part F: Imaging_Practical_01_part_f.doc
+
+Health Practical
+----------------
+Part 1a/b: Health Info Pracical 1\Health_Info_Practical_1_part2.m
+Part 1c : Health_Info_Practical_1_1c.doc
+GUI: Health Info Pracical 1\Health_Info_Practical_1.m

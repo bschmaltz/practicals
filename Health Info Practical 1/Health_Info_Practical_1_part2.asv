@@ -11,7 +11,7 @@
 %
 % or for rdann('mitdb/100', 'atr')
 %
-%But, rdann('chfdb/chf02','ecg') doesn't work. Specifying a different C 
+%Not even rdann('chfdb/chf02','ecg') works. Specifying a different C 
 %(channel) or 'type' parameter just returns an empty set. I think it's safe
 %to say this chfdb isn't working with the toolkit.  I hope you can be
 %understanding of this issue.
