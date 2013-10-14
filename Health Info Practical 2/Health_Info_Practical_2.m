@@ -22,7 +22,7 @@ function varargout = Health_Info_Practical_1(varargin)
 
 % Edit the above text to modify the response to help Health_Info_Practical_1
 
-% Last Modified by GUIDE v2.5 25-Sep-2013 03:07:11
+% Last Modified by GUIDE v2.5 13-Oct-2013 23:52:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -258,6 +258,29 @@ function waveform_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function avg_qr_Callback(hObject, eventdata, handles)
+% hObject    handle to avg_qr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of avg_qr as text
+%        str2double(get(hObject,'String')) returns contents of avg_qr as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function avg_qr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to avg_qr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
