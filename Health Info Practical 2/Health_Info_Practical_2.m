@@ -195,59 +195,16 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
-start = str2num(get(handles.start_time, 'String'));
-stop = str2num(get(handles.end_time, 'String'));
-if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
-  disp('enter a legal start and stop time');
-else
-  disp('start and stop times entered, loading plot...');
-  wave_num = get(hObject,'Value');
-  if wave_num == 10
-      wave_num=0;
-  end
-  axes(handles.original);
-  [tm,signal,fs]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
-  plot(tm,signal), xlim([start,stop]);
-  
-  %gaussian convulution
-  sigma = 2;
-  width = 30;
-  x = linspace(-width/2, width/2, width);
-  b = exp(-x.^2 / (2*sigma ^2)); %b is the convultion kernel
-  b = b/ sum(b);
-  signal = conv(signal, b, 'same');
-  ds = diff(signal)./diff(tm); %first differentiation
-  ds = conv(ds, b, 'same');
-  ds = ds.^2;
+    annotator = 'atr';
+    record = strcat('mitdb/10', num2str(wave_num));
+    start = str2num(get(handles.start_time, 'String'));
+    stop = str2num(get(handles.end_time, 'String'));
 
-  dds = diff(ds)./diff(tm(2:end)); %second differentiation
-  dds = 1.3*ds(2:end) + 1.1*dds;
+    Q = rdann(record, annotator);
+    sfreq = Q(1).sampleNumber./Q(1).timeInSeconds;
 
-  thres = 0.5 * max(dds(width:(end-width)));
-  min_dist = 72;  %fails when patient heartrate is over 300bpm or irregular heartbeat
-  [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'MINPEAKHEIGHT', thres);
-  
-  % Remove detected peaks at the very beginning and end due to convolution
-  % errors
-  final_s(final_s > (length(signal) - width)) = [];
-  final_s(final_s < width) = [];
-
-  beats = zeros(1, length(dds));
-  beats(final_s) = 1;
-
-  heartrate = sum(beats) / (stop-start) * fs * 60; 
-  rr = diff(final_s);
-  avg_rr = mean(rr) / fs;
-  
-  set(handles.hr, 'String', num2str(heartrate));
-  set(handles.avg_rr_interval, 'String', num2str(avg_rr));
-  
-  axes(handles.processed);
-  plot(tm(3:end), beats), xlim([start,stop]);
-  disp 'graph plotted'
-  
-  handles.processed_data = tm(3:end), beats; %for saving
-  guidata(gcbo,handles);
+    for k = str2double(start):str2double(stop)
+        time = time+k;
 end
 
 
