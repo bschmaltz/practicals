@@ -63,8 +63,8 @@ guidata(hObject, handles);
 Init_Function(hObject, eventdata, handles);
 
 function Init_Function(hObject, eventdata, handles)
-image = load('Test_Image_256.mat');
-image = image.I_256;
+image = load('Test_Image_512.mat');
+image = image.I_512;
 r=image(:,:,1);
 g=image(:,:,2);
 b=image(:,:,3);
@@ -77,7 +77,7 @@ imshow(image);
 pixels = impixel(image);
 sampled_image = image;
 
-h=waitbar(0,'please wait...clustering');
+h=waitbar(0,'Please wait...clustering');
 for row=1:size(image,1)
     for col=1:size(image,2)
         original_pixel = [image(row,col,1) image(row,col,2) image(row,col,3)];
@@ -95,9 +95,9 @@ for row=1:size(image,1)
         sampled_image(row,col,2)=new_pixel(2);
         sampled_image(row,col,3)=new_pixel(3);
     end
-    waitbar(row/size(image,1));
+    waitbar((row/size(image,1))*0.65);
 end
-delete(h);
+waitbar(0.65,h,'Please wait...calculating HSI')
 imshow(sampled_image);
 
 %calculate HSI
@@ -110,12 +110,14 @@ for row=1:size(image,1)
         H(row,col)=H(row,col)/(2*pi);
     end
 end
-
 S=1-3.*(min(min(r,g),b))./(r+g+b);
 I=(r+g+b)/3;
 hsi=cat(3,H,S,I);
-figure, imshow(hsi),title('HSI Image');
 
+waitbar(0.7,h,'Please wait...creating scatter plot')
+figure, scatter(H(:),S(:),1,[r(:) g(:) b(:)],'marker','.'),title('Color Distribution in HS space'),xlabel('Hue (H)'),ylabel('Saturation (S)'),whitebg('black');
+waitbar(1,h,'Done!')
+delete(h);
 
 
 % --- Outputs from this function are returned to the command line.
