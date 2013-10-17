@@ -195,10 +195,7 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
-    wave_num = get(hObject,'Value');
-    if wave_num == 10
-      wave_num=0;
-    end
+    wave_num = get(hObject,'Value')-1;
 
     %% Get Waveform
     % TODO: Add comments
@@ -269,8 +266,8 @@ function waveform_Callback(hObject, eventdata, handles)
     Rpos = [];
     for i = 1:length(P3)
         range = [(P3(i) - 20):(P3(i) + 20)];
-        m = max(A(range));
-        l = find(A(range) == m);
+        range = range(1 <= range & range <= length(A));
+        [~, l] = max(A(range));
         pos = range(l);
         Rpos = [Rpos pos];
     end
@@ -281,28 +278,28 @@ function waveform_Callback(hObject, eventdata, handles)
     Tpos = [];
     Tstart = [];
     Tstop =  [];
-    for i = round(Rpos/K)
+    for i = Rpos
         %% Locate Q-wave and start/stop
-        range = (i-ceil(0.150*sfreq/K)):(i-floor(0.03*sfreq/K));
-        range = range(1 <= range & range <= length(y));
-        [~, l] = min(y(range));
+        range = (i-ceil(0.150*sfreq)):(i-floor(0.03*sfreq));
+        range = range(1 <= range & range <= length(A));
+        [~, l] = min(A(range));
         pos = range(l);
        
-        range = (pos-ceil(0.055*sfreq/K)):pos;
-        range = range(1 <= range & range <= length(y));
-        if sum(y(range) < 0) == 0
-            [~, l] = max(y(range));
+        range = (pos-ceil(0.055*sfreq)):pos;
+        range = range(1 <= range & range <= length(A));
+        if sum(A(range) < 0) == 0
+            [~, l] = max(A(range));
         else
-            l = find(y(range) < 0,1);
+            l = find(A(range) < 0,1);
         end
         startpos = range(l);
         
-        range = pos:(pos+ceil(0.055*sfreq/K));
-        range = range(1 <= range & range <= length(y));
-        if sum(y(range) > 0) == 0
-            [~, l] = max(y(range));
+        range = pos:(pos+ceil(0.055*sfreq));
+        range = range(1 <= range & range <= length(A));
+        if sum(A(range) > 0) == 0
+            [~, l] = max(A(range));
         else
-            l = find(y(range) > 0, 1);
+            l = find(A(range) > 0, 1);
         end
         stoppos = range(l);
         
@@ -311,27 +308,27 @@ function waveform_Callback(hObject, eventdata, handles)
         Qstop =  [Qstop stoppos]
         
         %% Locate T-wave and start/stop
-        range = (i+floor(0.070*sfreq/K)):(i+ceil(0.300*sfreq/K));
-        range = range(1 <= range & range <= length(y));
-        [~, l] = max(y(range));
+        range = (i+floor(0.070*sfreq)):(i+ceil(0.300*sfreq));
+        range = range(1 <= range & range <= length(A));
+        [~, l] = max(A(range));
         pos = range(l);
         
-        range = (pos-floor(0.055*sfreq/K)):pos;
-        range = range(1 <= range & range <= length(y));
-        if sum(y(range) > 0) == 0
-            [~, l] = min(y(range));
+        range = (pos-floor(0.055*sfreq)):pos;
+        range = range(1 <= range & range <= length(A));
+        if sum(A(range) > 0) == 0
+            [~, l] = min(A(range));
         else
-            l = find(y(range) > 0,1);
+            l = find(A(range) > 0,1);
 
         end
         startpos = range(l);
         
-        range = pos:(pos+ceil(0.055*sfreq/K));
-        range = range(1 <= range & range <= length(y));
-        if sum(y(range) < 0) == 0
-            [~, l] = min(y(range));
+        range = pos:(pos+ceil(0.055*sfreq));
+        range = range(1 <= range & range <= length(A));
+        if sum(A(range) < 0) == 0
+            [~, l] = min(A(range));
         else
-            l = find(y(range) < 0, 1);
+            l = find(A(range) < 0, 1);
         end
         stoppos = range(l);
         
@@ -340,12 +337,12 @@ function waveform_Callback(hObject, eventdata, handles)
         Tstop =  [Tstop stoppos]
     end
     
-    Qpos = round(Qpos * length(A)/length(y))
-    Qstart =  round(Qstart * length(A)/length(y))
-    Qstop =  round(Qstop * length(A)/length(y))
-    Tpos = round(Tpos * length(A)/length(y))
-    Tstart =  round(Tstart * length(A)/length(y))
-    Tstop =  round(Tstop * length(A)/length(y))
+%    Qpos = round(Qpos * length(A)/length(y))
+%    Qstart =  round(Qstart * length(A)/length(y))
+%    Qstop =  round(Qstop * length(A)/length(y))
+%    Tpos = round(Tpos * length(A)/length(y))
+%    Tstart =  round(Tstart * length(A)/length(y))
+%    Tstop =  round(Tstop * length(A)/length(y))
     
     Ramp = A(Rpos);
     Qamp = A(Qpos);
