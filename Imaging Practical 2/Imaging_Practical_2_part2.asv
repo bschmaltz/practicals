@@ -24,9 +24,9 @@ figure
 subplot(2,3,1);
 imshow(gray),title('Grayscale 512x512');
 subplot(2,3,2);
-imshow(abs(gray_dct)),title('DCT');
+imshow(gray_dct),title('DCT');
 subplot(2,3,3);
-imshow(abs(gray_dct_trunc)),title('Truncated DCT');
+imshow(gray_dct_trunc),title('Truncated DCT');
 subplot(2,3,4);
 imshow(gray_idct),title('Inverse DCT Image');
 subplot(2,3,5);
@@ -34,6 +34,7 @@ imshow(residual_dct),title('DCT: Difference Image');
 
 
 gray_dft = fft2(gray);
+gray_dft_abs = abs(gray_dft);
 [B IX]=sort(abs(gray_dft(:)),'descend');
 gray_dft_trunc = zeros(size(gray));
 
@@ -56,9 +57,9 @@ figure
 subplot(2,3,1);
 imshow(gray),title('Grayscale 512x512');
 subplot(2,3,2);
-imshow(abs(gray_dft)),title('DFT');
+imshow(gray_dft),title('DFT');
 subplot(2,3,3);
-imshow(abs(gray_dft_trunc)),title('Truncated DFT');
+imshow(gray_dft_trunc),title('Truncated DFT');
 subplot(2,3,4);
 imshow(gray_idft),title('Inverse DFT Image');
 subplot(2,3,5);
