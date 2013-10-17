@@ -207,19 +207,20 @@ function waveform_Callback(hObject, eventdata, handles)
     start = str2num(get(handles.start_time, 'String'));
     stop = str2num(get(handles.end_time, 'String'));
 
+    disp('Retrieving annotation')
     Q = rdann(record, annotator);
     sfreq = Q(1).sampleNumber ./ Q(1).timeInSeconds;
 
-    time = [];
-    for k = start:stop
-        time = time + k;
-    end
+    startStr = sprintf('00:%02d:%02d', floor(start/60), mod(start,60))
+    stopStr = sprintf('00:%02d:%02d', floor(stop/60), mod(stop,60))
         
-    RAW = rdsamp(record, 'maxt', time);
+    disp('Retrieving samples')
+    RAW = rdsamp(record, 'begin', startStr, 'stop', stopStr);
     t = 1:size(RAW,1);
     t = t / sfreq;
     M = size(RAW,1);
 
+    axes(handles.original)
     plot(t', RAW(:,2));
 
     %% Setting Values
@@ -229,27 +230,28 @@ function waveform_Callback(hObject, eventdata, handles)
     z = zeros(100,1);
     A = v1';
     zc = A(1);
-    A = [z; A'; z];
+    %A = [z; A'; z];
 
     %% Filtering Raw Data
     % TODO: Add comments
+    disp('Filtering samples')
     s = A;
     ls = length(s);
     [c, l] = wavedec(s, 8, 'db4');
-    ca2 = appcoef(c, l, 'db4', 2);
-    base_corrected = ca2;
-    y = base_corrected - mean(base_corrected);
-    axes(handles.axes);
+    base_corrected = appcoef(c, l, 'db4', 2);
+    mbase = mean(base_corrected);
+    y = base_corrected - mbase;
     K = M/length(y);
     t = 1:length(y);
     t = t * K / sfreq;
-    plot(t(1:length(y))', y);
+
+    axes(handles.processed)
+    plot(t', y);
 
     %% Detect R Peak
     % TODO: Add comments
-    y1 = y;
-    m1 = max(y1) - max(my1)*.60;
-    P = find(y1 > m1);
+    m1 = max(y)*.40;
+    P = find(y > m1);
 
     % it will give two two points .. remove one point each
     % TODO: Add comments
@@ -263,7 +265,7 @@ function waveform_Callback(hObject, eventdata, handles)
         end
     end
 
-    P3 = P2 * 4;
+    P3 = round(P2 * K);
     Rpos = [];
     for i = 1:length(P3)
         range = [(P3(i) - 20):(P3(i) + 20)];
@@ -272,10 +274,96 @@ function waveform_Callback(hObject, eventdata, handles)
         pos = range(l);
         Rpos = [Rpos pos];
     end
+    
+    Qpos = [];
+    Qstart = [];
+    Qstop =  [];
+    Tpos = [];
+    Tstart = [];
+    Tstop =  [];
+    for i = round(Rpos/K)
+        %% Locate Q-wave and start/stop
+        range = (i-ceil(0.150*sfreq/K)):(i-floor(0.03*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        [~, l] = min(y(range));
+        pos = range(l);
+       
+        range = (pos-ceil(0.055*sfreq/K)):pos;
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) < 0) == 0
+            [~, l] = max(y(range));
+        else
+            l = find(y(range) < 0,1);
+        end
+        startpos = range(l);
+        
+        range = pos:(pos+ceil(0.055*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) > 0) == 0
+            [~, l] = max(y(range));
+        else
+            l = find(y(range) > 0, 1);
+        end
+        stoppos = range(l);
+        
+        Qpos = [Qpos pos]
+        Qstart = [Qstart startpos]
+        Qstop =  [Qstop stoppos]
+        
+        %% Locate T-wave and start/stop
+        range = (i+floor(0.070*sfreq/K)):(i+ceil(0.300*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        [~, l] = max(y(range));
+        pos = range(l);
+        
+        range = (pos-floor(0.055*sfreq/K)):pos;
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) > 0) == 0
+            [~, l] = min(y(range));
+        else
+            l = find(y(range) > 0,1);
 
+        end
+        startpos = range(l);
+        
+        range = pos:(pos+ceil(0.055*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) < 0) == 0
+            [~, l] = min(y(range));
+        else
+            l = find(y(range) < 0, 1);
+        end
+        stoppos = range(l);
+        
+        Tpos = [Tpos pos]
+        Tstart = [Tstart startpos]
+        Tstop =  [Tstop stoppos]
+    end
+    
+    Qpos = round(Qpos * length(A)/length(y))
+    Qstart =  round(Qstart * length(A)/length(y))
+    Qstop =  round(Qstop * length(A)/length(y))
+    Tpos = round(Tpos * length(A)/length(y))
+    Tstart =  round(Tstart * length(A)/length(y))
+    Tstop =  round(Tstop * length(A)/length(y))
+    
     Ramp = A(Rpos);
-    R_peaks = length(Rpos)
+    Qamp = A(Qpos);
+    Qstart_amp = A(Qstart);
+    Qstop_amp = A(Qstop);
+    Tamp = A(Tpos);
+    Tstart_amp = A(Tstart);
+    Tstop_amp = A(Tstop);
+    
+    R_peaks = length(Rpos);
+    avg_rr = mean(diff(Rpos))/sfreq
+    set(handles.avg_rr_interval, 'String', num2str(avg_rr));
 
+    axes(handles.marked)
+    plot((1:length(A))/sfreq, A, 'k-', ...
+         Rpos/sfreq, Ramp, 'bo', ...
+         Qstart/sfreq, Qstart_amp, 'g+', Qpos/sfreq, Qamp, 'b+', Qstop/sfreq, Qstop_amp, 'r+', ...
+         Tstart/sfreq, Tstart_amp, 'g*', Tpos/sfreq, Tamp, 'b*', Tstop/sfreq, Tstop_amp, 'r*')
 
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
