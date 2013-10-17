@@ -115,7 +115,7 @@ I=(r+g+b)/3;
 hsi=cat(3,H,S,I);
 
 waitbar(0.7,h,'Please wait...creating scatter plot')
-figure, scatter(H(:),S(:),1,[r(:) g(:) b(:)],'marker','.'),title('Color Distribution in HS space'),xlabel('Hue (H)'),ylabel('Saturation (S)'),whitebg('black');
+figure, scatter(H(:),S(:),1,[r(:) g(:) b(:)],'marker','.'),title('Color Distribution in HS space'),xlabel('Hue (H)'),ylabel('Saturation (S)'),colordef black;
 waitbar(1,h,'Done!')
 delete(h);
 
