@@ -7,6 +7,7 @@ load('Test_Image_1024.mat');
 
 %% a)
 % Look at the function called img_interp.m
+
 % function I=img_interp(original, target_rez, type)
 %   R=original(:, :, 1);
 %   G=original(:, :, 2);
@@ -38,7 +39,28 @@ scaled128_nearest=img_interp(I_128, 1024, 'nearest');
 scaled128_linear=img_interp(I_128, 1024, 'linear');
 scaled128_cubic=img_interp(I_128, 1024, 'cubic');
 
-%Comparison
+%Residual Image
+BM_64_N=abs(I-scaled64_nearest);
+BM_64_L=abs(I-scaled64_linear);
+BM_64_C=abs(I-scaled64_cubic);
+BM_512_N=abs(I-scaled512_nearest);
+BM_512_L=abs(I-scaled512_linear);
+BM_512_C=abs(I-scaled512_cubic);
+BM_256_N=abs(I-scaled256_nearest);
+BM_256_L=abs(I-scaled256_linear);
+BM_256_C=abs(I-scaled256_cubic);
+BM_128_N=abs(I-scaled128_nearest);
+BM_128_L=abs(I-scaled128_linear);
+BM_128_C=abs(I-scaled128_cubic);
+
+%Comparison Description:
+%The residuals from the 64x64 images are the brightest indicating those
+%are largest residuals. The residual images become darker with increasing
+%orginal resolution making the residual from the 512x512 image the darkest.
+%All of the nearest interpolation methods result in the most digiized
+%images where linear and cubic result in similar smoother images.
+%Additionally, the digitized look of the residuals becomes more smooth with
+%increasing orginal resolution.
 
 %% c)
 
@@ -81,7 +103,7 @@ ylabel('RMS Error')
 xlabel('Resolution of Input Image')
 legend('Nearest', 'Linear', 'Cubic')
 %% d)
-h = fspecial('gaussian');
+h = fspecial('gaussian', [5 5], 2);
 
 filtered_scaled64_nearest=imfilter(scaled64_nearest, h, 'same');
 filtered_scaled64_linear=imfilter(scaled64_linear, h, 'same');
