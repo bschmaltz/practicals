@@ -205,30 +205,28 @@ end
     wave_num = get(hObject,'Value')-1;
 
     %% Get Waveform
-    % TODO: Add comments
+    disp('Retrieving data')
     annotator = 'atr';
     record = strcat('mitdb/10', num2str(wave_num));
     start = str2num(get(handles.start_time, 'String'));
     stop = str2num(get(handles.end_time, 'String'));
 
-    disp('Retrieving annotation')
     Q = rdann(record, annotator);
     sfreq = Q(1).sampleNumber ./ Q(1).timeInSeconds;
 
-    startStr = sprintf('00:%02d:%02d', floor(start/60), mod(start,60))
-    stopStr = sprintf('00:%02d:%02d', floor(stop/60), mod(stop,60))
+    startStr = sprintf('00:%02d:%02d', floor(start/60), mod(start,60));
+    stopStr = sprintf('00:%02d:%02d', floor(stop/60), mod(stop,60));
         
-    disp('Retrieving samples')
     RAW = rdsamp(record, 'begin', startStr, 'stop', stopStr);
     t = 1:size(RAW,1);
     t = t / sfreq;
     M = size(RAW,1);
 
+    disp('Data retrieved, starting analysis')
     axes(handles.original)
     plot(t', RAW(:,2));
 
-    %% Setting Values
-    % TODO: Add comments
+    % Setting Values
     val = RAW;
     v1 = val(:,2) - val(1,2);
     z = zeros(100,1);
@@ -236,21 +234,23 @@ end
     zc = A(1);
     A = [z; A'; z];
 
-    %% Filtering Raw Data
-    % TODO: Add comments
+    % Filtering Raw Data
     disp('Filtering samples')
     s = A;
     ls = length(s);
+    % Convert data to wavelet domain
     [c, l] = wavedec(s, 8, 'db4');
+    % Convert the 2nd level of the wavelet domain back to remove noise
     base_corrected = appcoef(c, l, 'db4', 2);
     mbase = mean(base_corrected);
     y = base_corrected - mbase;
     K = M/length(y);
     t = 1:length(y);
+    % Convert sample number to time, this time factoring the change in scale due
+    % to the wavelet transformations
     t = t * K / sfreq;
 
-    %% Detect R Peak
-    % TODO: Add comments
+    % Detect R peaks
     m1 = max(y)*.40;
     P = find(y > m1);
 
@@ -258,7 +258,6 @@ end
     plot(t', y);
     
     % it will give two two points .. remove one point each
-    % TODO: Add comments
     P1 = P;
     last = P1(1);
     P2 = last;
@@ -269,15 +268,7 @@ end
         end
     end
 
-    Rpos = [];
-    for i = 1:length(P2)
-        range = [(P2(i) - 20):(P2(i) + 20)];
-        range = range(1 <= range & range <= length(y));
-        [~, l] = max(y(range));
-        pos = range(l);
-        Rpos = [Rpos pos];
-    end
-    
+    Rpos = P2; 
     Qpos = [];
     Qstart = [];
     Qstop =  [];
@@ -291,6 +282,7 @@ end
         [~, l] = min(y(range));
         pos = range(l);
        
+        % Find the start of the Q wave
         range = (pos-ceil(0.055*sfreq/K)):pos;
         range = range(1 <= range & range <= length(y));
         if sum(y(range) < 0) == 0
@@ -300,6 +292,7 @@ end
         end
         startpos = range(l);
         
+        % Find the stop of the Q wave
         range = pos:(pos+ceil(0.055*sfreq/K));
         range = range(1 <= range & range <= length(y));
         if sum(y(range) > 0) == 0
@@ -319,6 +312,7 @@ end
         [~, l] = max(y(range));
         pos = range(l);
         
+        % Find the start of the T wave
         range = (pos-floor(0.055*sfreq/K)):pos;
         range = range(1 <= range & range <= length(y));
         if sum(y(range) > 0) == 0
@@ -329,6 +323,7 @@ end
         end
         startpos = range(l);
         
+        % Find the stop of the T wave
         range = pos:(pos+ceil(0.055*sfreq/K));
         range = range(1 <= range & range <= length(y));
         if sum(y(range) < 0) == 0
@@ -351,6 +346,7 @@ end
     Tstart_amp = y(Tstart);
     Tstop_amp = y(Tstop);
     
+    % Calculate average RR and QR intervals and other statistics
     R_peaks = length(Rpos);
     avg_rr = mean(diff(Rpos))/sfreq*K;
     avg_qr = mean(Rpos-Qpos)/sfreq*K;
@@ -365,6 +361,7 @@ end
          Qstart/sfreq*K, Qstart_amp, 'g+', Qstop/sfreq*K, Qstop_amp, 'r+', Qpos/sfreq*K, Qamp, 'b+', ...
          Tstart/sfreq*K, Tstart_amp, 'g*', Tstop/sfreq*K, Tstop_amp, 'r*', Tpos/sfreq*K, Tamp, 'b*')
     
+     % plot moving waveform
     xlim([0 2])
     yrange = ylim();
     ylim([yrange(1)*.95 yrange(2)*1.05])
