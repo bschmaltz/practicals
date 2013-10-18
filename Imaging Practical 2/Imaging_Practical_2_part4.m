@@ -43,6 +43,15 @@ figure;
 imshow(BW_canny_256_cubic);
 title('256 Cubic');
 
+%Comparison to original benchmark:
+%Using the nearest method of interpolation resulted in a digitized
+%apearance not only for the scaled image but also in the resulting edges
+%found. Many of the edges found do not match the orgianl benchmark. In
+%regard to the linear and cubic methods both showed better representation
+%of the edges found on the benchmark. However, there was still a large
+%number of edges not found in the interpolated images that were found in
+%the orgial benchmark.
+
 %% c)
 
 h = fspecial('gaussian', [5 5], 2);
@@ -62,3 +71,8 @@ title('Filtered 256 Linear');
 figure;
 imshow(BW_canny_filtered_256_cubic);
 title('Filtered 256 Cubic');
+
+%Effect of smoothing:
+%Smoothing the image resulted in a lower number of edges found for all
+%three methods of interpolation. In particuarlly there was a loss of detail
+%in the image.
