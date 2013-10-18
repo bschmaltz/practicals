@@ -58,6 +58,7 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+t=timer();
 % UIWAIT makes Health_Info_Practical_2 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
