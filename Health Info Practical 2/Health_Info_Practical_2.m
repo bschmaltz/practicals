@@ -195,11 +195,14 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
-start = str2num(get(handles.start_time, 'String'));
-stop = str2num(get(handles.end_time, 'String'));
-if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
-  disp('enter a legal start and stop time');
-else
+    %check for valid start and stop boundaries
+    start = str2num(get(handles.start_time, 'String'));
+    stop = str2num(get(handles.end_time, 'String'));
+    if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
+      disp('enter a legal start and stop time');
+      return
+    end
+    
     wave_num = get(hObject,'Value')-1;
 
     %% Get Waveform
@@ -232,7 +235,7 @@ else
     z = zeros(100,1);
     A = v1';
     zc = A(1);
-    %A = [z; A'; z];
+    A = [z; A'; z];
 
     %% Filtering Raw Data
     % TODO: Add comments
@@ -247,14 +250,14 @@ else
     t = 1:length(y);
     t = t * K / sfreq;
 
-    axes(handles.processed)
-    plot(t', y);
-
     %% Detect R Peak
     % TODO: Add comments
     m1 = max(y)*.40;
     P = find(y > m1);
 
+    axes(handles.processed)
+    plot(t', y, t', m1);
+    
     % it will give two two points .. remove one point each
     % TODO: Add comments
     P1 = P;
@@ -267,12 +270,11 @@ else
         end
     end
 
-    P3 = round(P2 * K);
     Rpos = [];
-    for i = 1:length(P3)
-        range = [(P3(i) - 20):(P3(i) + 20)];
-        range = range(1 <= range & range <= length(A));
-        [~, l] = max(A(range));
+    for i = 1:length(P2)
+        range = [(P2(i) - 20):(P2(i) + 20)];
+        range = range(1 <= range & range <= length(y));
+        [~, l] = max(y(range));
         pos = range(l);
         Rpos = [Rpos pos];
     end
@@ -285,77 +287,70 @@ else
     Tstop =  [];
     for i = Rpos
         %% Locate Q-wave and start/stop
-        range = (i-ceil(0.150*sfreq)):(i-floor(0.03*sfreq));
-        range = range(1 <= range & range <= length(A));
-        [~, l] = min(A(range));
+        range = (i-ceil(0.150*sfreq/K)):(i-floor(0.03*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        [~, l] = min(y(range));
         pos = range(l);
        
-        range = (pos-ceil(0.055*sfreq)):pos;
-        range = range(1 <= range & range <= length(A));
-        if sum(A(range) < 0) == 0
-            [~, l] = max(A(range));
+        range = (pos-ceil(0.055*sfreq/K)):pos;
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) < 0) == 0
+            [~, l] = max(y(range));
         else
-            l = find(A(range) < 0,1);
+            l = find(y(range) < 0,1);
         end
         startpos = range(l);
         
-        range = pos:(pos+ceil(0.055*sfreq));
-        range = range(1 <= range & range <= length(A));
-        if sum(A(range) > 0) == 0
-            [~, l] = max(A(range));
+        range = pos:(pos+ceil(0.055*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) > 0) == 0
+            [~, l] = max(y(range));
         else
-            l = find(A(range) > 0, 1);
+            l = find(y(range) > 0, 1);
         end
         stoppos = range(l);
         
-        Qpos = [Qpos pos]
-        Qstart = [Qstart startpos]
-        Qstop =  [Qstop stoppos]
+        Qpos = [Qpos pos];
+        Qstart = [Qstart startpos];
+        Qstop =  [Qstop stoppos];
         
         %% Locate T-wave and start/stop
-        range = (i+floor(0.070*sfreq)):(i+ceil(0.300*sfreq));
-        range = range(1 <= range & range <= length(A));
-        [~, l] = max(A(range));
+        range = (i+floor(0.070*sfreq/K)):(i+ceil(0.300*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        [~, l] = max(y(range));
         pos = range(l);
         
-        range = (pos-floor(0.055*sfreq)):pos;
-        range = range(1 <= range & range <= length(A));
-        if sum(A(range) > 0) == 0
-            [~, l] = min(A(range));
+        range = (pos-floor(0.055*sfreq/K)):pos;
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) > 0) == 0
+            [~, l] = min(y(range));
         else
-            l = find(A(range) > 0,1);
+            l = find(y(range) > 0,1);
 
         end
         startpos = range(l);
         
-        range = pos:(pos+ceil(0.055*sfreq));
-        range = range(1 <= range & range <= length(A));
-        if sum(A(range) < 0) == 0
-            [~, l] = min(A(range));
+        range = pos:(pos+ceil(0.055*sfreq/K));
+        range = range(1 <= range & range <= length(y));
+        if sum(y(range) < 0) == 0
+            [~, l] = min(y(range));
         else
-            l = find(A(range) < 0, 1);
+            l = find(y(range) < 0, 1);
         end
         stoppos = range(l);
         
-        Tpos = [Tpos pos]
-        Tstart = [Tstart startpos]
-        Tstop =  [Tstop stoppos]
+        Tpos = [Tpos pos];
+        Tstart = [Tstart startpos];
+        Tstop =  [Tstop stoppos];
     end
     
-%    Qpos = round(Qpos * length(A)/length(y))
-%    Qstart =  round(Qstart * length(A)/length(y))
-%    Qstop =  round(Qstop * length(A)/length(y))
-%    Tpos = round(Tpos * length(A)/length(y))
-%    Tstart =  round(Tstart * length(A)/length(y))
-%    Tstop =  round(Tstop * length(A)/length(y))
-    
-    Ramp = A(Rpos);
-    Qamp = A(Qpos);
-    Qstart_amp = A(Qstart);
-    Qstop_amp = A(Qstop);
-    Tamp = A(Tpos);
-    Tstart_amp = A(Tstart);
-    Tstop_amp = A(Tstop);
+    Ramp = y(Rpos);
+    Qamp = y(Qpos);
+    Qstart_amp = y(Qstart);
+    Qstop_amp = y(Qstop);
+    Tamp = y(Tpos);
+    Tstart_amp = y(Tstart);
+    Tstop_amp = y(Tstop);
     
     R_peaks = length(Rpos);
     avg_rr = mean(diff(Rpos))/sfreq
@@ -366,7 +361,6 @@ else
          Rpos/sfreq, Ramp, 'bo', ...
          Qstart/sfreq, Qstart_amp, 'g+', Qpos/sfreq, Qamp, 'b+', Qstop/sfreq, Qstop_amp, 'r+', ...
          Tstart/sfreq, Tstart_amp, 'g*', Tpos/sfreq, Tamp, 'b*', Tstop/sfreq, Tstop_amp, 'r*')
-end
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveform (see GCBO)
