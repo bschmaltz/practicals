@@ -1,0 +1,8 @@
+For the Imaging Practical, we split up the files based on the 4 parts.  These files are all in the Imaging Practical 2 folder and start with our groups names and number.  Note, for part 1, the scatter plot will take a bit to generate.
+
+Part 1- Imaging_Practical_2.m
+Part 2- Imaging_practical_2_part2.m, Imaging Practical 2 pard 2d-e.docx
+Part 3- 
+Part 4-
+
+For the Health Practical, everything is in GUI: Health_Info_Practical_2.m

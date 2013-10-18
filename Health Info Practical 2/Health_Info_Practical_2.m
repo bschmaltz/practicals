@@ -178,7 +178,7 @@ function save_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'hr')
-    processed = handles.processed_data;
+    %sprocessed = handles.processed_data;
     avg_rr = get(handles.avg_rr_interval, 'String');
     hr = get(handles.hr, 'String');
     start = get(handles.start_time, 'String');
