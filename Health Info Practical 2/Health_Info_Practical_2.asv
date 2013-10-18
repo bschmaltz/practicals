@@ -195,11 +195,10 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
-start = str2num(get(handles.start_time, 'String'));
-stop = str2num(get(handles.end_time, 'String'));
 if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
   disp('enter a legal start and stop time');
-else
+  
+end
     wave_num = get(hObject,'Value')-1;
 
     %% Get Waveform
@@ -366,7 +365,7 @@ else
          Rpos/sfreq, Ramp, 'bo', ...
          Qstart/sfreq, Qstart_amp, 'g+', Qpos/sfreq, Qamp, 'b+', Qstop/sfreq, Qstop_amp, 'r+', ...
          Tstart/sfreq, Tstart_amp, 'g*', Tpos/sfreq, Tamp, 'b*', Tstop/sfreq, Tstop_amp, 'r*')
-end
+
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveform (see GCBO)
