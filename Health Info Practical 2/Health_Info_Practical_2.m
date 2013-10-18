@@ -352,9 +352,13 @@ end
     Tstop_amp = y(Tstop);
     
     R_peaks = length(Rpos);
-    avg_rr = mean(diff(Rpos))/sfreq;
-    set(handles.avg_rr_interval, 'String', num2str(avg_rr));
-
+    avg_rr = mean(diff(Rpos))/sfreq*K;
+    avg_qr = mean(Rpos-Qpos)/sfreq*K;
+    heartrate = 60 / avg_rr;
+    set(handles.avg_rr_interval, 'String', num2str(avg_rr));   
+    set(handles.hr, 'String', num2str(heartrate));
+    set(handles.avg_qr, 'String', num2str(avg_qr));
+    
     axes(handles.marked)
     plot(t, y, 'k-', ...
          Rpos/sfreq*K, Ramp, 'bo', ...
@@ -372,8 +376,6 @@ end
         xmax = xmax + step;
         pause(0.05)
     end
-        
-        
 
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
