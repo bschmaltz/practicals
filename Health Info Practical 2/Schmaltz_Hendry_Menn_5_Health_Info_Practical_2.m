@@ -178,7 +178,7 @@ function save_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if isfield(handles,'hr')
-    %sprocessed = handles.processed_data;
+    processed = handles.processed_data;
     avg_rr = get(handles.avg_rr_interval, 'String');
     hr = get(handles.hr, 'String');
     start = get(handles.start_time, 'String');
@@ -354,7 +354,8 @@ end
     set(handles.avg_rr_interval, 'String', num2str(avg_rr));   
     set(handles.hr, 'String', num2str(heartrate));
     set(handles.avg_qr, 'String', num2str(avg_qr));
-    
+    handles.processed_data = y;
+    guidata(gcbo,handles);
     axes(handles.marked)
     plot(t, y, 'k-', ...
          Rpos/sfreq*K, Ramp, 'bo', ...
@@ -373,7 +374,7 @@ end
         xmax = xmax + step;
         pause(0.05)
     end
-
+    
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveform (see GCBO)
