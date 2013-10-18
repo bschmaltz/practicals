@@ -195,14 +195,12 @@ function waveform_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns waveform contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from waveform
-    %check for valid start and stop boundaries
-    start = str2num(get(handles.start_time, 'String'));
-    stop = str2num(get(handles.end_time, 'String'));
-    if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
-      disp('enter a legal start and stop time');
-      return
-    end
-    
+start = str2num(get(handles.start_time, 'String'));
+stop = str2num(get(handles.end_time, 'String'));
+if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
+  disp('enter a legal start and stop time');
+  return
+end
     wave_num = get(hObject,'Value')-1;
 
     %% Get Waveform
@@ -357,10 +355,11 @@ function waveform_Callback(hObject, eventdata, handles)
     set(handles.avg_rr_interval, 'String', num2str(avg_rr));
 
     axes(handles.marked)
-    plot((1:length(A))/sfreq, A, 'k-', ...
-         Rpos/sfreq, Ramp, 'bo', ...
-         Qstart/sfreq, Qstart_amp, 'g+', Qpos/sfreq, Qamp, 'b+', Qstop/sfreq, Qstop_amp, 'r+', ...
-         Tstart/sfreq, Tstart_amp, 'g*', Tpos/sfreq, Tamp, 'b*', Tstop/sfreq, Tstop_amp, 'r*')
+    plot((1:length(y))/sfreq*K, y, 'k-', ...
+         Rpos/sfreq*K, Ramp, 'bo', ...
+         Qstart/sfreq*K, Qstart_amp, 'g+', Qstop/sfreq*K, Qstop_amp, 'r+', Qpos/sfreq*K, Qamp, 'b+', ...
+         Tstart/sfreq*K, Tstart_amp, 'g*', Tstop/sfreq*K, Tstop_amp, 'r*', Tpos/sfreq*K, Tamp, 'b*')
+
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveform (see GCBO)
