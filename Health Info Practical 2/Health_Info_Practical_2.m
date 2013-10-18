@@ -254,7 +254,7 @@ end
     P = find(y > m1);
 
     axes(handles.processed)
-    plot(t', y, t', m1);
+    plot(t', y);
     
     % it will give two two points .. remove one point each
     % TODO: Add comments
@@ -351,14 +351,28 @@ end
     Tstop_amp = y(Tstop);
     
     R_peaks = length(Rpos);
-    avg_rr = mean(diff(Rpos))/sfreq
+    avg_rr = mean(diff(Rpos))/sfreq;
     set(handles.avg_rr_interval, 'String', num2str(avg_rr));
 
     axes(handles.marked)
-    plot((1:length(y))/sfreq*K, y, 'k-', ...
+    plot(t, y, 'k-', ...
          Rpos/sfreq*K, Ramp, 'bo', ...
          Qstart/sfreq*K, Qstart_amp, 'g+', Qstop/sfreq*K, Qstop_amp, 'r+', Qpos/sfreq*K, Qamp, 'b+', ...
          Tstart/sfreq*K, Tstart_amp, 'g*', Tstop/sfreq*K, Tstop_amp, 'r*', Tpos/sfreq*K, Tamp, 'b*')
+    
+    xlim([0 2])
+    yrange = ylim();
+    ylim([yrange(1)*.95 yrange(2)*1.05])
+    xmax = 2;
+    step = 0.01;
+    while(xmax < max(t))
+        oldlim = xlim();
+        xlim(oldlim+step);
+        xmax = xmax + step;
+        pause(0.05)
+    end
+        
+        
 
 % --- Executes during object creation, after setting all properties.
 function waveform_CreateFcn(hObject, eventdata, handles)
