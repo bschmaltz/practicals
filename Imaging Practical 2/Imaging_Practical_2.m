@@ -63,6 +63,7 @@ guidata(hObject, handles);
 Init_Function(hObject, eventdata, handles);
 
 function Init_Function(hObject, eventdata, handles)
+%load image
 image = load('Test_Image_512.mat');
 image = image.I_512;
 r=image(:,:,1);
@@ -73,11 +74,12 @@ msgbox('Select a sample for each color in the order: blue-purple, white, pink an
 axes(handles.image);
 imshow(image);
 
-%divide pixels into chose clusters
+%divide pixels into chosen clusters
 pixels = impixel(image);
 sampled_image = image;
 
 h=waitbar(0,'Please wait...clustering');
+%loop through each pixel and determine 
 for row=1:size(image,1)
     for col=1:size(image,2)
         original_pixel = [image(row,col,1) image(row,col,2) image(row,col,3)];

@@ -22,7 +22,7 @@ function varargout = Health_Info_Practical_2(varargin)
 
 % Edit the above text to modify the response to help Health_Info_Practical_2
 
-% Last Modified by GUIDE v2.5 14-Oct-2013 21:26:27
+% Last Modified by GUIDE v2.5 17-Oct-2013 20:27:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1613,5 +1613,3 @@ try
 catch
     result = false;
 end
-
-
