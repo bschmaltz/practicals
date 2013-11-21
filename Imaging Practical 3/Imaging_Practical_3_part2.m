@@ -31,25 +31,18 @@ for i=1:size(D,1)
 end
 
 %part G: Find the repseentation of data in principal component space
-[COEFF,SCORE] = princomp(double(datar));
-Y = zeros(size(cov_matrix,1), size(cov_matrix,1));
-for i=1:size(cov_matrix,1)
-    Y(:,i)=(cov_matrix)*(cov_matrix(i,:)'-mean_vector);
-end
+
+
 
 %part H: reconstruct data from Hotelling transform
-reconstruct = zeros(size(cov_matrix,1), size(cov_matrix,1));
-for i=1:size(cov_matrix,1)
-    reconstruct(:,i)=(cov_matrix')*Y(i,:)'+mean_vector;
-end
+
+
 
 %Part I:
 %Printing the difference between the original and reconstructed matrix
 %shows slight difference between the two.
-cov_matrix-reconstruct
+
+
 
 %Part J:
-figure
-subplot(2,3,1);
-imshow(Y),title('Grayscale 512x512');
 

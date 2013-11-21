@@ -184,6 +184,4 @@ ha = Generate_Accum(edges, min_radius, max_radius);
 
 R_range = zeros(max_radius-min_radius+1,1);
 for i=1:size(R_range,1)
-    R_range(i)=min_radius+i-1
-end
-peaks = Detect_Peaks(ha, R_range)
+    R_range(
