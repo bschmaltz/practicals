@@ -199,56 +199,217 @@ start = str2num(get(handles.start_time, 'String'));
 stop = str2num(get(handles.end_time, 'String'));
 if isempty(start)||isempty(stop)|| stop<=start || start<0 || stop>50000
   disp('enter a legal start and stop time');
-else
-  disp('start and stop times entered, loading plot...');
-  wave_num = get(hObject,'Value');
-  if wave_num == 10
-      wave_num=0;
-  end
-  axes(handles.original);
-  [tm,signal,fs]=rdsamp(strcat('mitdb/10', num2str(wave_num)),1,stop,start,true);
-  plot(tm,signal), xlim([start,stop]);
-  
-  %gaussian convulution
-  sigma = 2;
-  width = 30;
-  x = linspace(-width/2, width/2, width);
-  b = exp(-x.^2 / (2*sigma ^2)); %b is the convultion kernel
-  b = b/ sum(b);
-  signal = conv(signal, b, 'same');
-  ds = diff(signal)./diff(tm); %first differentiation
-  ds = conv(ds, b, 'same');
-  ds = ds.^2;
-
-  dds = diff(ds)./diff(tm(2:end)); %second differentiation
-  dds = 1.3*ds(2:end) + 1.1*dds;
-
-  thres = 0.5 * max(dds(width:(end-width)));
-  min_dist = 72;  %fails when patient heartrate is over 300bpm or irregular heartbeat
-  [~, final_s] = findpeaks(dds, 'MINPEAKDISTANCE', min_dist, 'MINPEAKHEIGHT', thres);
-  
-  % Remove detected peaks at the very beginning and end due to convolution
-  % errors
-  final_s(final_s > (length(signal) - width)) = [];
-  final_s(final_s < width) = [];
-
-  beats = zeros(1, length(dds));
-  beats(final_s) = 1;
-
-  heartrate = sum(beats) / (stop-start) * fs * 60; 
-  rr = diff(final_s);
-  avg_rr = mean(rr) / fs;
-  
-  set(handles.hr, 'String', num2str(heartrate));
-  set(handles.avg_rr, 'String', num2str(avg_rr));
-  
-  axes(handles.processed);
-  plot(tm(3:end), beats), xlim([start,stop]);
-  disp 'graph plotted'
-  
-  handles.processed_data = tm(3:end), beats; %for saving
-  guidata(gcbo,handles);
+  return
 end
+    wave_num = get(hObject,'Value')-1;
+
+    %% Get Waveform
+    disp('Retrieving data')
+    annotator = 'atr';
+    record = strcat('mitdb/10', num2str(wave_num));
+    start = str2num(get(handles.start_time, 'String'));
+    stop = str2num(get(handles.end_time, 'String'));
+
+    Q = rdann(record, annotator);
+    sfreq = Q(1).sampleNumber ./ Q(1).timeInSeconds;
+
+    startStr = datestr(start/86400, 'HH:MM:SS');
+    stopStr = datestr(stop/86400, 'HH:MM:SS');
+        
+    RAW = rdsamp(record, 'begin', startStr, 'stop', stopStr);
+    t = 1:size(RAW,1);
+    t = t / sfreq;
+    M = size(RAW,1);
+
+    disp('Data retrieved, starting analysis')
+    axes(handles.original)
+    plot(t', RAW(:,2));
+
+    % Setting Values
+    val = RAW;
+    v1 = val(:,2) - val(1,2);
+    z = zeros(100,1);
+    A = v1';
+    zc = A(1);
+    A = [z; A'; z];
+
+    % Filtering Raw Data
+    disp('Filtering samples')
+    s = A;
+    ls = length(s);
+    % Convert data to wavelet domain
+    [c, l] = wavedec(s, 8, 'db4');
+    % Convert the 2nd level of the wavelet domain back to remove noise
+    base_corrected = appcoef(c, l, 'db4', 2);
+    mbase = mean(base_corrected);
+    y = base_corrected - mbase;
+    K = M/length(y);
+    t = 1:length(y);
+    % Convert sample number to time, this time factoring the change in scale due
+    % to the wavelet transformations
+    t = t * K / sfreq;
+
+    % Detect R peaks
+    m1 = max(y)*.40;
+    P = find(y > m1);
+
+    axes(handles.processed)
+    plot(t', y);
+    
+    % it will give two two points .. remove one point each
+    P1 = P;
+    last = P1(1);
+    P2 = last;
+    for i=2:length(P1)
+        if(P1(i) > (last + 10))
+            last = P1(i);
+            P2 = [P2 last];
+        end
+    end
+
+    Rpos = P2; 
+    Qpos = [];
+    Qstart = [];
+    Qstop =  [];
+    Tpos = [];
+    Tstart = [];
+    Tstop =  [];
+    Spos = [];
+    Sstart = [];
+    Sstop =  [];
+    Ppos = [];
+    Pstart = [];
+    Pstop =  [];
+
+    for R = Rpos
+            newQpos = findCenter(R, [-0.150 -0.03], y, sfreq, K, 'min');
+            if ~isempty(newQpos)
+                Qpos = [Qpos newQpos];
+                Qstart = [Qstart findStart(newQpos, 0.055, y, sfreq, K, 'max')];
+                Qstop =  [Qstop findStop(newQpos, 0.055, y, sfreq, K, 'max')];
+            end
+        
+            newTpos = findCenter(R, [0.070 0.300], y, sfreq, K, 'max');
+            if ~isempty(newTpos)
+                Tpos = [Tpos newTpos];
+                Tstart = [Tstart findStart(newTpos, 0.055, y, sfreq, K, 'min')];
+                Tstop =  [Tstop findStop(newTpos, 0.055, y, sfreq, K, 'min')];
+            end
+
+            newPpos = findCenter(R, [-0.300 -0.030], y, sfreq, K, 'max');
+            if ~isempty(newPpos)
+                Ppos = [Ppos newPpos];
+                Pstart = [Pstart findStart(newPpos, 0.055, y, sfreq, K, 'min')];
+                Pstop =  [Pstop findStop(newPpos, 0.055, y, sfreq, K, 'min')];
+            end
+
+            newSpos = findCenter(R, [0.050 0.150], y, sfreq, K, 'min');
+            if ~isempty(newSpos)
+                Spos = [Spos newSpos];
+                Sstart = [Sstart findStart(newSpos, 0.055, y, sfreq, K, 'max')];
+                Sstop =  [Sstop findStop(newSpos, 0.055, y, sfreq, K, 'max')];
+            end
+    end
+    
+    % Remove extra/erroneous R-peaks
+    Rpos = Rpos(Rpos > Ppos(1));
+    Ramp = y(Rpos);
+    Qamp = y(Qpos);
+    Qstart_amp = y(Qstart);
+    Qstop_amp = y(Qstop);
+    Tamp = y(Tpos);
+    Tstart_amp = y(Tstart);
+    Tstop_amp = y(Tstop);
+    Pamp = y(Ppos);
+    Pstart_amp = y(Pstart);
+    Pstop_amp = y(Pstop);
+    Samp = y(Spos);
+    Sstart_amp = y(Sstart);
+    Sstop_amp = y(Sstop);
+    
+    % Calculate average RR and QR intervals and other statistics
+    R_peaks = length(Rpos);
+    avg_rr = mean(diff(Rpos))/sfreq*K;    
+    avg_qr = mean(Rpos-Qpos)/sfreq*K;
+    avg_pq = mean(Qpos-Ppos)/sfreq*K;
+    avg_st = mean(Tpos-Spos)/sfreq*K;
+    
+    sd_rr = std(diff(Rpos))/sfreq*K;
+    sd_qr = std(Rpos-Qpos)/sfreq*K;
+    sd_pq = std(Qpos-Ppos)/sfreq*K;
+    sd_st = std(Tpos-Spos)/sfreq*K;
+    
+    avg_Pamp = mean(Pamp);
+    avg_Qamp = mean(Qamp);
+    avg_Ramp = mean(Ramp);
+    avg_Samp = mean(Samp);
+    avg_Tamp = mean(Tamp);
+    
+    sd_Pamp = std(Pamp);
+    sd_Qamp = std(Qamp);
+    sd_Ramp = std(Ramp);
+    sd_Samp = std(Samp);
+    sd_Tamp = std(Tamp);
+    
+    heartrate = 60 / avg_rr;
+    
+    set(handles.avg_rr, 'String', num2str(avg_rr));   
+    set(handles.hr, 'String', num2str(heartrate));
+    set(handles.avg_qr, 'String', num2str(avg_qr));
+    set(handles.avg_pq, 'String', num2str(avg_pq));
+    set(handles.avg_st, 'String', num2str(avg_st));
+    
+    handles.processed_data = y;
+    guidata(gcbo,handles);
+    axes(handles.marked)
+    plot(t, y, 'k-', ...
+         Rpos/sfreq*K, Ramp, 'bo', ...
+         Qstart/sfreq*K, Qstart_amp, 'g+', Qstop/sfreq*K, Qstop_amp, 'r+', Qpos/sfreq*K, Qamp, 'b+', ...
+         Tstart/sfreq*K, Tstart_amp, 'g*', Tstop/sfreq*K, Tstop_amp, 'r*', Tpos/sfreq*K, Tamp, 'b*', ...
+         Pstart/sfreq*K, Pstart_amp, 'gx', Pstop/sfreq*K, Pstop_amp, 'rx', Ppos/sfreq*K, Pamp, 'bx', ...
+         Sstart/sfreq*K, Sstart_amp, 'gs', Sstop/sfreq*K, Sstop_amp, 'rs', Spos/sfreq*K, Samp, 'bs')
+    
+     % plot moving waveform
+    xlim([0 2])
+    yrange = ylim();
+    ylim([yrange(1)*.95 yrange(2)*1.05])
+    xmax = 2;
+    step = 0.01;
+    while(xmax < max(t))
+        oldlim = xlim();
+        xlim(oldlim+step);
+        xmax = xmax + step;
+        pause(0.05)
+    end
+
+function center = findCenter(position, offset, amplitude, sfreq, K, minmax)
+    func = str2func(minmax);
+    range = (position+floor(offset(1)*sfreq/K)):(position+ceil(offset(2)*sfreq/K));
+    range = range(1 <= range & range <= length(amplitude));
+    [~, l] = func(amplitude(range));
+    center = range(l);
+
+function start = findStart(position, offset, amplitude, sfreq, K, minmax)
+    func = str2func(minmax);
+    range = (position-ceil(offset*sfreq/K)):position;
+    range = range(1 <= range & range <= length(amplitude));
+    if sum(amplitude(range) < 0) == 0
+        [~, l] = func(amplitude(range));
+    else
+        l = find(amplitude(range) < 0,1);
+    end
+    start = range(l);    
+
+function stop = findStop(position, offset, amplitude, sfreq, K, minmax)
+    func = str2func(minmax);
+    range = position:(position+ceil(offset*sfreq/K));
+    range = range(1 <= range & range <= length(amplitude));
+    if sum(amplitude(range) > 0) == 0
+        [~, l] = func(amplitude(range));
+    else
+        l = find(amplitude(range) > 0, 1);
+    end
+    stop = range(l);
 
 
 % --- Executes during object creation, after setting all properties.
