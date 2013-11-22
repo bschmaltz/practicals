@@ -71,8 +71,10 @@ axes(handles.orig_image);
 imshow(orig);
 
 axes(handles.blue_image);
-filter = fspecial('gaussian', [n n], n/5);
-blue = imfilter(orig(:,:,3), filter);
+h =fspecial('gaussian', [n n], n/5);
+padded_blue=padarray(orig(:, :, 1), [n*5 n*5], 255);
+padded_blue = imfilter(padded_blue, h);
+blue=padded_blue(n*5+1:end-n*5-1, n*5+1:end-n*5-1);
 imshow(blue);
 
 axes(handles.edge_image);
