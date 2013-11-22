@@ -148,19 +148,21 @@ imshow(open_c10),title('Open with Circle 10');
 %step.
 
 %Part G
-%For a opening operation you will need to use a shape of size 26. Circle or
-%square will work. The code below is using a cirlce
+%For a opening operation you will need to use a shape of size 26. A square
+%will leave it in two parts
 image2=zeros(500,500);
 image2(75:424, 75:424)=image;
 [featR2, featC2] = find(edge(image2));
-c50=draw_circle(26);
+s26 = zeros(26,26);
+s26(:)=255;
 e_c50 = erode(image2, featR2, featC2, c50);
 [featR_e_c50, featC_e_c50] = find(edge(e_c50));
 open_c50   = dilate(e_c50, featR_e_c50, featC_e_c50, c50);
 figure
 imshow(e_c50),title('Open with Circle 26, splits bottom box');
 
-%For a closing operation you cannot split this figure because you are
+%For a closing operation you cannot split this black because you are
 %forced to dilate first. As stated in part F, closing eleminates smaller
-%spaces, and strengthens dominate white spaces.  Because this block
-%is primarily white you cannot eliminate any of teh 
+%black spaces, and strengthens dominate white spaces.  Because this block
+%is primarily white you cannot eliminate any of the white features, i.e.
+%split the block.
