@@ -68,3 +68,7 @@ imagesc(fiftieth);
 title('50th')
 
 %Part K:
+%The components show different levels of varience between. This means that
+%the 1st component would show the areas with the most significant
+%relationship between the different data dimensions, and the 50th component
+%would show the least significant.
