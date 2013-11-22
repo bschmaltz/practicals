@@ -41,8 +41,6 @@ reconstructed=bsxfun(@plus, eVec*y, mean_vector);
 %Part I:
 %Printing the difference between the original and reconstructed matrix
 %shows slight difference between the two.
-
-%Part J:
 first=reshape(y(1,:), 91, 84);
 fifth=reshape(y(5,:), 91, 84);
 tenth=reshape(y(10,:), 91, 84);
@@ -50,21 +48,13 @@ fifteenth=reshape(y(15,:), 91, 84);
 twentieth=reshape(y(20, :), 91, 84);
 fiftieth=reshape(y(50, :), 91, 84);
 imagesc(first);
-title('1st')
 figure;
 imagesc(fifth);
-title('5th')
 figure;
 imagesc(tenth);
-title('10th')
 figure;
 imagesc(fifteenth);
-title('15th')
 figure;
-imagesc(twentieth);
-title('20th')
-figure;
-imagesc(fiftieth);
-title('50th')
+imagesc();
+%Part J:
 
-%Part K:
