@@ -78,6 +78,7 @@ blue=padded_blue(n*5+1:end-n*5-1, n*5+1:end-n*5-1);
 imshow(blue);
 
 axes(handles.edge_image);
+blue(blue<min(min(blue))+3*mean(std(double(blue))))=0;
 edges = edge(blue,'canny');
 imshow(edges);
 
