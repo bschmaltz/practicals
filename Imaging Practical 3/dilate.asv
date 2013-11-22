@@ -1,7 +1,0 @@
-function [ dilation ] = dilate( image, edgesR, edgesC, struct )
-    for i=1:size(edgesR,1)
-        offset = (size(struct,1)-1)/2;
-        image((edgesR(i)-offset):(edgesR(i)+offset), (edgesC(i)-offset):(edgesC(i)+offset))
-    end
-end
-

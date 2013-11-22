@@ -148,17 +148,17 @@ imshow(open_c10),title('Open with Circle 10');
 %step.
 
 %Part G
-%For a opening operation you will need to use a shape of size 26. Circle or
-%square will work. The code below is using a cirlce
+%For a opening operation you will need to use a square of size 51.
 image2=zeros(500,500);
 image2(75:424, 75:424)=image;
 [featR2, featC2] = find(edge(image2));
-c50=draw_circle(26);
-e_c50 = erode(image2, featR2, featC2, c50);
-[featR_e_c50, featC_e_c50] = find(edge(e_c50));
-open_c50   = dilate(e_c50, featR_e_c50, featC_e_c50, c50);
+s51 = zeros(51,51);
+s51(:)=255;
+e_s51 = erode(image2, featR2, featC2, s51);
+[featR_e_s51, featC_e_s51] = find(edge(e_s51));
+open_s51   = dilate(e_s51, featR_e_s51, featC_e_s51, s51);
 figure
-imshow(e_c50),title('Open with Circle 26, splits bottom box');
+imshow(open_s51),title('Open with Square 51, splits bottom box');
 
 %For a closing operation you cannot split this black because you are
 %forced to dilate first. As stated in part F, closing eleminates smaller
