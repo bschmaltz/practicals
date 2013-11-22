@@ -339,18 +339,6 @@ end
     sd_pq = std(Qpos-Ppos)/sfreq*K;
     sd_st = std(Tpos-Spos)/sfreq*K;
     
-    avg_Pamp = mean(Pamp);
-    avg_Qamp = mean(Qamp);
-    avg_Ramp = mean(Ramp);
-    avg_Samp = mean(Samp);
-    avg_Tamp = mean(Tamp);
-    
-    sd_Pamp = std(Pamp);
-    sd_Qamp = std(Qamp);
-    sd_Ramp = std(Ramp);
-    sd_Samp = std(Samp);
-    sd_Tamp = std(Tamp);
-    
     heartrate = 60 / avg_rr;
     
     set(handles.avg_rr, 'String', num2str(avg_rr));   
@@ -368,8 +356,49 @@ end
          Tstart/sfreq*K, Tstart_amp, 'g*', Tstop/sfreq*K, Tstop_amp, 'r*', Tpos/sfreq*K, Tamp, 'b*', ...
          Pstart/sfreq*K, Pstart_amp, 'gx', Pstop/sfreq*K, Pstop_amp, 'rx', Ppos/sfreq*K, Pamp, 'bx', ...
          Sstart/sfreq*K, Sstart_amp, 'gs', Sstop/sfreq*K, Sstop_amp, 'rs', Spos/sfreq*K, Samp, 'bs')
+   
+    %% PCA analysis
+    components = { 'Pamp', 'Qamp', 'Ramp', 'Samp', 'Tamp', 'PQ Int', 'QR Int', 'ST Int' };
+    data = [ Pamp';
+             Qamp';
+             Ramp';
+             Samp';
+             Tamp';
+             Qpos-Ppos;
+             Rpos-Qpos;
+             Tpos-Spos ];
+    avg = mean(data,1);
+    covar = cov(data,1);
     
-     % plot moving waveform
+    [V D] = eig(covar);
+    eVal = zeros(1,size(D,1));
+    for i=1:size(D,1)
+        eVal(i)=D(i,i);
+    end
+    eVal = sort(eVal,'descend');
+    D_Used = zeros(1,size(D,1));
+    eVec = zeros(size(V,1),size(V,2));
+    for i=1:size(D,1)
+        for j=1:size(D,1)
+            if(eVal(i)==D(j,j) & D_Used(j)==0)
+                eVec(:,i) = V(:,j);
+                D_Used(j)=1;
+                break;
+            end
+        end
+    end
+    mean_zero_data=bsxfun(@minus, avg, double(data));
+    y=eVec'*mean_zero_data';
+    var = diag(cov(y));
+    [~, i] = sort(var);
+    disp(sprintf('Top 5 features:'))
+    disp(sprintf('1) %s', components{i(end)}))
+    disp(sprintf('2) %s', components{i(end-1)}))
+    disp(sprintf('3) %s', components{i(end-2)}))
+    disp(sprintf('4) %s', components{i(end-3)}))
+    disp(sprintf('5) %s', components{i(end-4)}))
+    
+    % plot moving waveform
     xlim([0 2])
     yrange = ylim();
     ylim([yrange(1)*.95 yrange(2)*1.05])
@@ -380,7 +409,8 @@ end
         xlim(oldlim+step);
         xmax = xmax + step;
         pause(0.05)
-    end
+    end    
+             
 
 function center = findCenter(position, offset, amplitude, sfreq, K, minmax)
     func = str2func(minmax);
